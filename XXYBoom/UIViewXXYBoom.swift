@@ -159,16 +159,7 @@ extension UIView{
     }
     
     func makeScaleValue() -> CGFloat{
-        let randomNumber = random()%101
-        var scale = CGFloat(1)
-        
-        if randomNumber >= 0 && randomNumber <= 50{
-            scale = 1 + 0.7 * (CGFloat(randomNumber)/CGFloat(50))
-        }else{
-            scale = 1 - 0.7 * (CGFloat(randomNumber - 50)/CGFloat(50))
-        }
-        
-        return scale
+        return 1 - 0.7 * (CGFloat(random()%101 - 50)/CGFloat(50))
     }
     
     func makeRandomPath(aLayer:CALayer) -> UIBezierPath{
@@ -182,7 +173,6 @@ extension UIView{
         let controlPointOffSetY = layer.position.y - 0.2 * layer.frame.size.height - CGFloat(random()%Int(1.2 * layer.frame.size.height))
         let endPointY = layer.position.y + layer.frame.size.height/2 + CGFloat(random()%Int(layer.frame.size.height/2))
         particlePath.addQuadCurveToPoint(CGPointMake(endPointX, endPointY), controlPoint: CGPointMake(controlPointOffSetX, controlPointOffSetY))
-        
         return particlePath
     }
     
