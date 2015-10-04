@@ -174,13 +174,13 @@ extension UIView{
     func makeRandomPath(aLayer:CALayer) -> UIBezierPath{
         let particlePath = UIBezierPath()
         particlePath.moveToPoint(layer.position)
-        let basicLeft = -CGFloat(150)
+        let basicLeft = -CGFloat(1.3 * layer.frame.size.width)
         let maxOffset = 2 * abs(basicLeft)
         let randomNumber = random()%101
         let endPointX = basicLeft + maxOffset * (CGFloat(randomNumber)/CGFloat(100)) + aLayer.position.x
         let controlPointOffSetX = (endPointX - aLayer.position.x)/2  + aLayer.position.x
-        let controlPointOffSetY = layer.position.y - 20 - CGFloat(random()%140)
-        let endPointY = layer.position.y + 100 + CGFloat(random()%36)
+        let controlPointOffSetY = layer.position.y - 0.2 * layer.frame.size.height - CGFloat(random()%Int(1.2 * layer.frame.size.height))
+        let endPointY = layer.position.y + layer.frame.size.height/2 + CGFloat(random()%Int(layer.frame.size.height/2))
         particlePath.addQuadCurveToPoint(CGPointMake(endPointX, endPointY), controlPoint: CGPointMake(controlPointOffSetX, controlPointOffSetY))
         
         return particlePath

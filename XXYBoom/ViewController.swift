@@ -24,6 +24,7 @@ class ViewController: UIViewController {
     }
 
     @IBAction func boomAction(sender: AnyObject) {
+        //view.boom()
         (sender as! UIButton).enabled = false
         delay(0, task: {self.yyImg.boom()})
         delay(1, task: {self.chromeImg.boom()})
