@@ -71,32 +71,10 @@ extension UIView{
         shakeYAnimation.values = [makeShakeValue(layer.position.y),makeShakeValue(layer.position.y),makeShakeValue(layer.position.y),makeShakeValue(layer.position.y),makeShakeValue(layer.position.y)]
         
         
-        //缩放
-        let scaleAnimation = CABasicAnimation(keyPath: "transform.scale")
-        scaleAnimation.toValue = 0.01
-        scaleAnimation.duration = 0.15
-        scaleAnimation.removedOnCompletion = false
-        scaleAnimation.beginTime = shakeXAnimation.duration
-        scaleAnimation.fillMode = kCAFillModeForwards
+        layer.addAnimation(shakeXAnimation, forKey: "shakeXAnimation")
+        layer.addAnimation(shakeYAnimation, forKey: "shakeYAnimation")
         
-        //透明度
-        let opacityAnimation = CABasicAnimation(keyPath: "opacity")
-        opacityAnimation.fromValue = 1
-        opacityAnimation.toValue = 0
-        opacityAnimation.duration = 0.15
-        opacityAnimation.removedOnCompletion = false
-        opacityAnimation.beginTime = shakeXAnimation.duration
-        opacityAnimation.fillMode = kCAFillModeForwards
-        
-        //组合
-        let groupAnimation = CAAnimationGroup()
-        groupAnimation.animations = [shakeXAnimation,shakeYAnimation,scaleAnimation,opacityAnimation]
-        groupAnimation.duration  = 0.35
-        groupAnimation.removedOnCompletion = false
-        groupAnimation.fillMode = kCAFillModeForwards
-        groupAnimation.delegate = self
-        layer.addAnimation(groupAnimation, forKey: "groupAnimation")
-        
+        let scaleDelayTimer = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: "scaleOpacityAnimations", userInfo: nil, repeats: false)
         
         if boomCells == nil{
             boomCells = [CALayer]()
@@ -106,7 +84,7 @@ extension UIView{
                         scaleSnapshot = snapshot().scaleImageToSize(CGSizeMake(34, 34))
                     }
                     let pWidth = min(frame.size.width,frame.size.height)/17
-                    let color = UIImage.getPixelColorAtLocation(CGPointMake(CGFloat(i * 2), CGFloat(j * 2)), image: scaleSnapshot!)
+                    let color = scaleSnapshot!.getPixelColorAtLocation(CGPointMake(CGFloat(i * 2), CGFloat(j * 2)))
                     let shape = CALayer()
                     shape.backgroundColor = color.CGColor
                     shape.opacity = 0
@@ -119,6 +97,25 @@ extension UIView{
         }
         
         let delayTimer = NSTimer.scheduledTimerWithTimeInterval(0.35, target: self, selector: "cellAnimations", userInfo: nil, repeats: false)
+    }
+    
+    func scaleOpacityAnimations(){
+        //缩放
+        let scaleAnimation = CABasicAnimation(keyPath: "transform.scale")
+        scaleAnimation.toValue = 0.01
+        scaleAnimation.duration = 0.15
+        scaleAnimation.fillMode = kCAFillModeForwards
+        
+        //透明度
+        let opacityAnimation = CABasicAnimation(keyPath: "opacity")
+        opacityAnimation.fromValue = 1
+        opacityAnimation.toValue = 0
+        opacityAnimation.duration = 0.15
+        opacityAnimation.fillMode = kCAFillModeForwards
+        
+        layer.addAnimation(scaleAnimation, forKey: "lscale")
+        layer.addAnimation(opacityAnimation, forKey: "lopacity")
+        layer.opacity = 0
     }
     
     func cellAnimations(){
@@ -187,39 +184,51 @@ extension UIView{
         particlePath.addQuadCurveToPoint(CGPointMake(endPointX, endPointY), controlPoint: CGPointMake(controlPointOffSetX, controlPointOffSetY))
         
         return particlePath
-
     }
     
-    
-    public override func animationDidStop(anim: CAAnimation!, finished flag: Bool) {
-        cellAnimations()
+    func reset(){
+        layer.opacity = 1
     }
     
 }
 extension UIImage{
-    //缩放图片
-    func scaleImageToSize(size:CGSize) -> UIImage{
-        UIGraphicsBeginImageContext(size)
-        drawInRect(CGRectMake(0, 0, size.width, size.height))
-        let res = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return res
+    
+    private struct AssociatedKeys {
+        static var aRGBBitmapContextName = "aRGBBitmapContext"
     }
     
-    class func createARGBBitmapContextFromImage(inImage:CGImageRef) -> CGContextRef{
-        let pixelsWidth = CGImageGetWidth(inImage)
-        let pixelsHeitht = CGImageGetHeight(inImage)
-        let bitmapBytesPerRow = pixelsWidth * 4
-        let bitmapByteCount = bitmapBytesPerRow * pixelsHeitht
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapData = UnsafeMutablePointer<Void>.alloc(bitmapByteCount)
-        let context = CGBitmapContextCreate(bitmapData,pixelsWidth,pixelsHeitht,8,bitmapBytesPerRow,colorSpace!, CGBitmapInfo(rawValue: CGBitmapInfo.ByteOrderDefault.rawValue | CGImageAlphaInfo.PremultipliedFirst.rawValue))
-        return context
+    private var aRGBBitmapContext:CGContextRef?{
+        get{
+            return (objc_getAssociatedObject(self, &AssociatedKeys.aRGBBitmapContextName) as! CGContextRef?)
+        }
+        set{
+            if let newValue = newValue{
+                willChangeValueForKey(AssociatedKeys.aRGBBitmapContextName)
+                objc_setAssociatedObject(self, &AssociatedKeys.aRGBBitmapContextName, newValue as CGContextRef, UInt(OBJC_ASSOCIATION_RETAIN_NONATOMIC))
+                didChangeValueForKey(AssociatedKeys.aRGBBitmapContextName)
+            }
+        }
     }
     
-    class func getPixelColorAtLocation(point:CGPoint, image:UIImage) -> UIColor{
-        let inImage = image.CGImage
-        let cgctx = UIImage.createARGBBitmapContextFromImage(inImage)
+    func createARGBBitmapContextFromImage() -> CGContextRef{
+        if aRGBBitmapContext != nil{
+            return aRGBBitmapContext!
+        }else{
+            let pixelsWidth = CGImageGetWidth(self.CGImage)
+            let pixelsHeitht = CGImageGetHeight(self.CGImage)
+            let bitmapBytesPerRow = pixelsWidth * 4
+            let bitmapByteCount = bitmapBytesPerRow * pixelsHeitht
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            let bitmapData = UnsafeMutablePointer<Void>.alloc(bitmapByteCount)
+            let context = CGBitmapContextCreate(bitmapData,pixelsWidth,pixelsHeitht,8,bitmapBytesPerRow,colorSpace!, CGBitmapInfo(rawValue: CGBitmapInfo.ByteOrderDefault.rawValue | CGImageAlphaInfo.PremultipliedFirst.rawValue))
+            aRGBBitmapContext = context
+            return context
+        }
+    }
+    
+    func getPixelColorAtLocation(point:CGPoint) -> UIColor{
+        let inImage = self.CGImage
+        let cgctx = createARGBBitmapContextFromImage()
         let w = CGFloat(CGImageGetWidth(inImage))
         let h = CGFloat(CGImageGetHeight(inImage))
         let rect = CGRectMake(0, 0, w, h)
@@ -234,6 +243,15 @@ extension UIImage{
         var b = CGFloat(resData[pixelInfo+3]) / CGFloat(255.0)
         
         return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+    
+    //缩放图片
+    func scaleImageToSize(size:CGSize) -> UIImage{
+        UIGraphicsBeginImageContext(size)
+        drawInRect(CGRectMake(0, 0, size.width, size.height))
+        let res = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return res
     }
     
 }

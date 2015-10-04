@@ -9,7 +9,7 @@
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="XXYBang_" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="XXYBoom" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -127,6 +127,19 @@
                                     <action selector="boomAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="789-pT-b3B"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="M8I-nx-wg4">
+                                <rect key="frame" x="269" y="300" width="63" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="3Cg-tl-8bc"/>
+                                    <constraint firstAttribute="width" constant="63" id="vp5-BL-obc"/>
+                                </constraints>
+                                <state key="normal" title="还原">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="resetAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="i8c-8L-p3S"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -135,6 +148,7 @@
                             <constraint firstItem="5vk-Hu-Mdj" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="10" id="CBL-ej-hbD"/>
                             <constraint firstItem="5Tl-Yj-ScH" firstAttribute="width" secondItem="5vk-Hu-Mdj" secondAttribute="width" id="D4G-vv-5Qp"/>
                             <constraint firstItem="61t-PM-5Ct" firstAttribute="top" secondItem="KbG-iF-Clb" secondAttribute="bottom" constant="18" id="Elv-tX-w8U"/>
+                            <constraint firstItem="M8I-nx-wg4" firstAttribute="top" secondItem="61t-PM-5Ct" secondAttribute="bottom" constant="2" id="J21-jp-908"/>
                             <constraint firstItem="KbG-iF-Clb" firstAttribute="leading" secondItem="5Tl-Yj-ScH" secondAttribute="trailing" id="Jtf-DP-ZiU"/>
                             <constraint firstItem="KbG-iF-Clb" firstAttribute="top" secondItem="tFl-XZ-0Ht" secondAttribute="bottom" id="PW4-aB-tW4"/>
                             <constraint firstItem="5vk-Hu-Mdj" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Qpb-fm-GRs"/>
@@ -144,6 +158,7 @@
                             <constraint firstItem="tFl-XZ-0Ht" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" constant="10" id="bGG-Kt-dOJ"/>
                             <constraint firstItem="5Tl-Yj-ScH" firstAttribute="top" secondItem="5vk-Hu-Mdj" secondAttribute="bottom" id="dc2-6B-VZ8"/>
                             <constraint firstItem="lTp-64-VTN" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" constant="10" id="dzn-Tf-nDL"/>
+                            <constraint firstAttribute="centerX" secondItem="M8I-nx-wg4" secondAttribute="centerX" id="fGl-yH-VwE"/>
                             <constraint firstItem="tFl-XZ-0Ht" firstAttribute="leading" secondItem="5vk-Hu-Mdj" secondAttribute="trailing" id="hxi-J5-bNa"/>
                             <constraint firstItem="lTp-64-VTN" firstAttribute="leading" secondItem="tFl-XZ-0Ht" secondAttribute="trailing" id="i8u-ra-1Fh"/>
                             <constraint firstItem="lTp-64-VTN" firstAttribute="width" secondItem="tFl-XZ-0Ht" secondAttribute="width" id="isL-3s-MrR"/>

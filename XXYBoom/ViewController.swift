@@ -34,6 +34,16 @@ class ViewController: UIViewController {
         delay(6, task: {self.clickButton.boom()})
     }
     
+    @IBAction func resetAction(sender: AnyObject) {
+        clickButton.enabled = true
+        clickButton.reset()
+        yyImg.reset()
+        chromeImg.reset()
+        instrgamImg.reset()
+        firfoxImg.reset()
+        githubImg.reset()
+        sinaImg.reset()
+    }
     typealias Task = (cancel : Bool) -> ()
     
     func delay(time:NSTimeInterval, task:()->()) ->  Task? {
