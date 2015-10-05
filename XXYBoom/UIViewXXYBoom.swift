@@ -47,6 +47,33 @@ extension UIView{
         return image
     }
     
+    public override class func initialize() {
+        struct Static {
+            static var token: dispatch_once_t = 0
+        }
+        
+        dispatch_once(&Static.token) {
+            let originalSelector = Selector("willMoveToSuperview:")
+            let swizzledSelector = Selector("XXY_willMoveToSuperview:")
+            
+            let originalMethod = class_getInstanceMethod(self, originalSelector)
+            let swizzledMethod = class_getInstanceMethod(self, swizzledSelector)
+            
+            let didAddMethod = class_addMethod(self, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod))
+            
+            if didAddMethod {
+                class_replaceMethod(self, swizzledSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod))
+            } else {
+                method_exchangeImplementations(originalMethod, swizzledMethod);
+            }
+        }
+    }
+    
+    func XXY_willMoveToSuperview(newSuperView:UIView){
+        removeBoomCells()
+        XXY_willMoveToSuperview(newSuperView)
+    }
+    
     func colorWithPoint(x:Int,y:Int,image:UIImage) -> UIColor{
         var pixelData = CGDataProviderCopyData(CGImageGetDataProvider(image.CGImage))
         var data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
@@ -178,6 +205,18 @@ extension UIView{
     
     func reset(){
         layer.opacity = 1
+    }
+    
+    //移除粒子
+    private func removeBoomCells(){
+        if boomCells == nil {
+            return
+        }
+        for item in boomCells!{
+            item.removeFromSuperlayer()
+        }
+        boomCells?.removeAll(keepCapacity: false)
+        boomCells = nil
     }
     
 }

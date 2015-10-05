@@ -37,6 +37,13 @@ class ViewController: UIViewController {
     
     @IBAction func resetAction(sender: AnyObject) {
         clickButton.enabled = true
+//        clickButton.removeFromSuperview()
+//        yyImg.removeFromSuperview()
+//        chromeImg.removeFromSuperview()
+//        instrgamImg.removeFromSuperview()
+//        firfoxImg.removeFromSuperview()
+//        githubImg.removeFromSuperview()
+//        sinaImg.removeFromSuperview()
         clickButton.reset()
         yyImg.reset()
         chromeImg.reset()
