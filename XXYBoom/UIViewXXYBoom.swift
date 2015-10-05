@@ -13,6 +13,7 @@ extension UIView{
         static var BoomCellsName = "XXYBoomCells"
         static var ScaleSnapshotName = "XXYBoomScaleSnapshot"
     }
+    //MARK: - 私有方法
     private var boomCells:[CALayer]?{
         get{
             return objc_getAssociatedObject(self, &AssociatedKeys.BoomCellsName) as? [CALayer]
@@ -25,6 +26,7 @@ extension UIView{
             }
         }
     }
+    //截图
     private var scaleSnapshot:UIImage?{
         get{
             return objc_getAssociatedObject(self, &AssociatedKeys.ScaleSnapshotName) as? UIImage
@@ -38,43 +40,89 @@ extension UIView{
         }
     }
     
-    //从layer获取View的截图
-    func snapshot() -> UIImage{
-        UIGraphicsBeginImageContext(layer.frame.size)
-        layer.renderInContext(UIGraphicsGetCurrentContext())
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image
-    }
-    
-    public override class func initialize() {
-        struct Static {
-            static var token: dispatch_once_t = 0
-        }
+    //view的缩放和透明度动画
+    @objc private func scaleOpacityAnimations(){
+        //缩放
+        let scaleAnimation = CABasicAnimation(keyPath: "transform.scale")
+        scaleAnimation.toValue = 0.01
+        scaleAnimation.duration = 0.15
+        scaleAnimation.fillMode = kCAFillModeForwards
         
-        dispatch_once(&Static.token) {
-            let originalSelector = Selector("willMoveToSuperview:")
-            let swizzledSelector = Selector("XXY_willMoveToSuperview:")
+        //透明度
+        let opacityAnimation = CABasicAnimation(keyPath: "opacity")
+        opacityAnimation.fromValue = 1
+        opacityAnimation.toValue = 0
+        opacityAnimation.duration = 0.15
+        opacityAnimation.fillMode = kCAFillModeForwards
+        
+        layer.addAnimation(scaleAnimation, forKey: "lscale")
+        layer.addAnimation(opacityAnimation, forKey: "lopacity")
+        layer.opacity = 0
+    }
+    
+    //粒子动画
+    @objc private func cellAnimations(){
+        for shape in boomCells!{
+            shape.position = center
+            shape.opacity = 1
+            //路径
+            let moveAnimation = CAKeyframeAnimation(keyPath: "position")
+            moveAnimation.path = makeRandomPath(shape).CGPath
+            moveAnimation.removedOnCompletion = false
+            moveAnimation.fillMode = kCAFillModeForwards
+            moveAnimation.timingFunction = CAMediaTimingFunction(controlPoints: 0.240000, 0.590000, 0.506667, 0.026667)
+            moveAnimation.duration = NSTimeInterval(random()%10) * 0.05 + 0.3
             
-            let originalMethod = class_getInstanceMethod(self, originalSelector)
-            let swizzledMethod = class_getInstanceMethod(self, swizzledSelector)
+            let scaleAnimation = CABasicAnimation(keyPath: "transform.scale")
+            scaleAnimation.toValue = makeScaleValue()
+            scaleAnimation.duration = moveAnimation.duration
+            scaleAnimation.removedOnCompletion = false
+            scaleAnimation.fillMode = kCAFillModeForwards
             
-            let didAddMethod = class_addMethod(self, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod))
+            let opacityAnimation = CABasicAnimation(keyPath: "opacity")
+            opacityAnimation.fromValue = 1
+            opacityAnimation.toValue = 0
+            opacityAnimation.duration = moveAnimation.duration
+            opacityAnimation.delegate = false
+            opacityAnimation.removedOnCompletion = true
+            opacityAnimation.fillMode = kCAFillModeForwards
+            opacityAnimation.timingFunction = CAMediaTimingFunction(controlPoints: 0.380000, 0.033333, 0.963333, 0.260000)
             
-            if didAddMethod {
-                class_replaceMethod(self, swizzledSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod))
-            } else {
-                method_exchangeImplementations(originalMethod, swizzledMethod);
-            }
+            shape.opacity = 0
+            shape.addAnimation(scaleAnimation, forKey: "scaleAnimation")
+            shape.addAnimation(moveAnimation, forKey: "moveAnimation")
+            shape.addAnimation(opacityAnimation, forKey: "opacityAnimation")
         }
     }
     
-    func XXY_willMoveToSuperview(newSuperView:UIView){
-        removeBoomCells()
-        XXY_willMoveToSuperview(newSuperView)
+    //随机产生震动值
+    private func makeShakeValue(p:CGFloat) -> CGFloat{
+        let basicOrigin = -CGFloat(10)
+        let maxOffset = -2 * basicOrigin
+        return basicOrigin + maxOffset * (CGFloat(random()%101)/CGFloat(100)) + p
     }
     
-    func colorWithPoint(x:Int,y:Int,image:UIImage) -> UIColor{
+    //随机产生缩放数值
+    private func makeScaleValue() -> CGFloat{
+        return 1 - 0.7 * (CGFloat(random()%101 - 50)/CGFloat(50))
+    }
+    
+    //随机产生粒子路径
+    private func makeRandomPath(aLayer:CALayer) -> UIBezierPath{
+        let particlePath = UIBezierPath()
+        particlePath.moveToPoint(layer.position)
+        let basicLeft = -CGFloat(1.3 * layer.frame.size.width)
+        let maxOffset = 2 * abs(basicLeft)
+        let randomNumber = random()%101
+        let endPointX = basicLeft + maxOffset * (CGFloat(randomNumber)/CGFloat(100)) + aLayer.position.x
+        let controlPointOffSetX = (endPointX - aLayer.position.x)/2  + aLayer.position.x
+        let controlPointOffSetY = layer.position.y - 0.2 * layer.frame.size.height - CGFloat(random()%Int(1.2 * layer.frame.size.height))
+        let endPointY = layer.position.y + layer.frame.size.height/2 + CGFloat(random()%Int(layer.frame.size.height/2))
+        particlePath.addQuadCurveToPoint(CGPointMake(endPointX, endPointY), controlPoint: CGPointMake(controlPointOffSetX, controlPointOffSetY))
+        return particlePath
+    }
+    
+    private func colorWithPoint(x:Int,y:Int,image:UIImage) -> UIColor{
         var pixelData = CGDataProviderCopyData(CGImageGetDataProvider(image.CGImage))
         var data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
         
@@ -86,6 +134,28 @@ extension UIView{
         var b = CGFloat(data[pixelInfo+3]) / CGFloat(255.0)
         
         return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+    
+    //移除粒子
+    private func removeBoomCells(){
+        if boomCells == nil {
+            return
+        }
+        for item in boomCells!{
+            item.removeFromSuperlayer()
+        }
+        boomCells?.removeAll(keepCapacity: false)
+        boomCells = nil
+    }
+    
+    //MARK: - 公开方法
+    //从layer获取View的截图
+    func snapshot() -> UIImage{
+        UIGraphicsBeginImageContext(layer.frame.size)
+        layer.renderInContext(UIGraphicsGetCurrentContext())
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
     }
     
     func boom(){
@@ -126,98 +196,39 @@ extension UIView{
         let delayTimer = NSTimer.scheduledTimerWithTimeInterval(0.35, target: self, selector: "cellAnimations", userInfo: nil, repeats: false)
     }
     
-    func scaleOpacityAnimations(){
-        //缩放
-        let scaleAnimation = CABasicAnimation(keyPath: "transform.scale")
-        scaleAnimation.toValue = 0.01
-        scaleAnimation.duration = 0.15
-        scaleAnimation.fillMode = kCAFillModeForwards
-        
-        //透明度
-        let opacityAnimation = CABasicAnimation(keyPath: "opacity")
-        opacityAnimation.fromValue = 1
-        opacityAnimation.toValue = 0
-        opacityAnimation.duration = 0.15
-        opacityAnimation.fillMode = kCAFillModeForwards
-        
-        layer.addAnimation(scaleAnimation, forKey: "lscale")
-        layer.addAnimation(opacityAnimation, forKey: "lopacity")
-        layer.opacity = 0
-    }
-    
-    func cellAnimations(){
-        for shape in boomCells!{
-            shape.position = center
-            shape.opacity = 1
-            //路径
-            let moveAnimation = CAKeyframeAnimation(keyPath: "position")
-            moveAnimation.path = makeRandomPath(shape).CGPath
-            moveAnimation.removedOnCompletion = false
-            moveAnimation.fillMode = kCAFillModeForwards
-            moveAnimation.timingFunction = CAMediaTimingFunction(controlPoints: 0.240000, 0.590000, 0.506667, 0.026667)
-            moveAnimation.duration = NSTimeInterval(random()%10) * 0.05 + 0.3
-            
-            let scaleAnimation = CABasicAnimation(keyPath: "transform.scale")
-            scaleAnimation.toValue = makeScaleValue()
-            scaleAnimation.duration = moveAnimation.duration
-            scaleAnimation.removedOnCompletion = false
-            scaleAnimation.fillMode = kCAFillModeForwards
-            
-            let opacityAnimation = CABasicAnimation(keyPath: "opacity")
-            opacityAnimation.fromValue = 1
-            opacityAnimation.toValue = 0
-            opacityAnimation.duration = moveAnimation.duration
-            opacityAnimation.delegate = false
-            opacityAnimation.removedOnCompletion = true
-            opacityAnimation.fillMode = kCAFillModeForwards
-            opacityAnimation.timingFunction = CAMediaTimingFunction(controlPoints: 0.380000, 0.033333, 0.963333, 0.260000)
-            
-            shape.opacity = 0
-            shape.addAnimation(scaleAnimation, forKey: "scaleAnimation")
-            shape.addAnimation(moveAnimation, forKey: "moveAnimation")
-            shape.addAnimation(opacityAnimation, forKey: "opacityAnimation")
-        }
-    }
-    
-    func makeShakeValue(p:CGFloat) -> CGFloat{
-        let basicOrigin = -CGFloat(10)
-        let maxOffset = -2 * basicOrigin
-        return basicOrigin + maxOffset * (CGFloat(random()%101)/CGFloat(100)) + p
-    }
-    
-    func makeScaleValue() -> CGFloat{
-        return 1 - 0.7 * (CGFloat(random()%101 - 50)/CGFloat(50))
-    }
-    
-    func makeRandomPath(aLayer:CALayer) -> UIBezierPath{
-        let particlePath = UIBezierPath()
-        particlePath.moveToPoint(layer.position)
-        let basicLeft = -CGFloat(1.3 * layer.frame.size.width)
-        let maxOffset = 2 * abs(basicLeft)
-        let randomNumber = random()%101
-        let endPointX = basicLeft + maxOffset * (CGFloat(randomNumber)/CGFloat(100)) + aLayer.position.x
-        let controlPointOffSetX = (endPointX - aLayer.position.x)/2  + aLayer.position.x
-        let controlPointOffSetY = layer.position.y - 0.2 * layer.frame.size.height - CGFloat(random()%Int(1.2 * layer.frame.size.height))
-        let endPointY = layer.position.y + layer.frame.size.height/2 + CGFloat(random()%Int(layer.frame.size.height/2))
-        particlePath.addQuadCurveToPoint(CGPointMake(endPointX, endPointY), controlPoint: CGPointMake(controlPointOffSetX, controlPointOffSetY))
-        return particlePath
-    }
-    
+    //重置状态
     func reset(){
         layer.opacity = 1
     }
     
-    //移除粒子
-    private func removeBoomCells(){
-        if boomCells == nil {
-            return
+    //MARK: - 生命周期相关，在从父View移除的时候释放粒子
+    public override class func initialize() {
+        struct Static {
+            static var token: dispatch_once_t = 0
         }
-        for item in boomCells!{
-            item.removeFromSuperlayer()
+        
+        dispatch_once(&Static.token) {
+            let originalSelector = Selector("willMoveToSuperview:")
+            let swizzledSelector = Selector("XXY_willMoveToSuperview:")
+            
+            let originalMethod = class_getInstanceMethod(self, originalSelector)
+            let swizzledMethod = class_getInstanceMethod(self, swizzledSelector)
+            
+            let didAddMethod = class_addMethod(self, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod))
+            
+            if didAddMethod {
+                class_replaceMethod(self, swizzledSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod))
+            } else {
+                method_exchangeImplementations(originalMethod, swizzledMethod);
+            }
         }
-        boomCells?.removeAll(keepCapacity: false)
-        boomCells = nil
     }
+    
+    func XXY_willMoveToSuperview(newSuperView:UIView){
+        removeBoomCells()
+        XXY_willMoveToSuperview(newSuperView)
+    }
+    
     
 }
 extension UIImage{
