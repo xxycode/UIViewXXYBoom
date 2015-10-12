@@ -21,7 +21,7 @@ extension UIView{
         set{
             if let newValue = newValue{
                 willChangeValueForKey(AssociatedKeys.BoomCellsName)
-                objc_setAssociatedObject(self, &AssociatedKeys.BoomCellsName, newValue as [CALayer], UInt(OBJC_ASSOCIATION_RETAIN_NONATOMIC))
+                objc_setAssociatedObject(self, &AssociatedKeys.BoomCellsName, newValue as [CALayer], .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
                 didChangeValueForKey(AssociatedKeys.BoomCellsName)
             }
         }
@@ -34,7 +34,7 @@ extension UIView{
         set{
             if let newValue = newValue{
                 willChangeValueForKey(AssociatedKeys.ScaleSnapshotName)
-                objc_setAssociatedObject(self, &AssociatedKeys.ScaleSnapshotName, newValue as UIImage, UInt(OBJC_ASSOCIATION_RETAIN_NONATOMIC))
+                objc_setAssociatedObject(self, &AssociatedKeys.ScaleSnapshotName, newValue as UIImage, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
                 didChangeValueForKey(AssociatedKeys.ScaleSnapshotName)
             }
         }
@@ -123,15 +123,15 @@ extension UIView{
     }
     
     private func colorWithPoint(x:Int,y:Int,image:UIImage) -> UIColor{
-        var pixelData = CGDataProviderCopyData(CGImageGetDataProvider(image.CGImage))
-        var data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
+        let pixelData = CGDataProviderCopyData(CGImageGetDataProvider(image.CGImage))
+        let data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
         
-        var pixelInfo: Int = ((Int(image.size.width) * y) + x) * 4
+        let pixelInfo: Int = ((Int(image.size.width) * y) + x) * 4
         
-        var a = CGFloat(data[pixelInfo]) / CGFloat(255.0)
-        var r = CGFloat(data[pixelInfo+1]) / CGFloat(255.0)
-        var g = CGFloat(data[pixelInfo+2]) / CGFloat(255.0)
-        var b = CGFloat(data[pixelInfo+3]) / CGFloat(255.0)
+        let a = CGFloat(data[pixelInfo]) / CGFloat(255.0)
+        let r = CGFloat(data[pixelInfo+1]) / CGFloat(255.0)
+        let g = CGFloat(data[pixelInfo+2]) / CGFloat(255.0)
+        let b = CGFloat(data[pixelInfo+3]) / CGFloat(255.0)
         
         return UIColor(red: r, green: g, blue: b, alpha: a)
     }
@@ -152,7 +152,7 @@ extension UIView{
     //从layer获取View的截图
     func snapshot() -> UIImage{
         UIGraphicsBeginImageContext(layer.frame.size)
-        layer.renderInContext(UIGraphicsGetCurrentContext())
+        layer.renderInContext(UIGraphicsGetCurrentContext()!)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image
@@ -171,7 +171,7 @@ extension UIView{
         layer.addAnimation(shakeXAnimation, forKey: "shakeXAnimation")
         layer.addAnimation(shakeYAnimation, forKey: "shakeYAnimation")
         
-        let scaleDelayTimer = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: "scaleOpacityAnimations", userInfo: nil, repeats: false)
+        _ = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: "scaleOpacityAnimations", userInfo: nil, repeats: false)
         
         if boomCells == nil{
             boomCells = [CALayer]()
@@ -187,13 +187,13 @@ extension UIView{
                     shape.opacity = 0
                     shape.cornerRadius = pWidth/2
                     shape.frame = CGRectMake(CGFloat(i) * pWidth, CGFloat(j) * pWidth, pWidth, pWidth)
-                    layer.superlayer.addSublayer(shape)
+                    layer.superlayer?.addSublayer(shape)
                     boomCells?.append(shape)
                 }
             }
         }
         
-        let delayTimer = NSTimer.scheduledTimerWithTimeInterval(0.35, target: self, selector: "cellAnimations", userInfo: nil, repeats: false)
+        _ = NSTimer.scheduledTimerWithTimeInterval(0.35, target: self, selector: "cellAnimations", userInfo: nil, repeats: false)
     }
     
     //重置状态
@@ -244,7 +244,7 @@ extension UIImage{
         set{
             if let newValue = newValue{
                 willChangeValueForKey(AssociatedKeys.aRGBBitmapContextName)
-                objc_setAssociatedObject(self, &AssociatedKeys.aRGBBitmapContextName, newValue as CGContextRef, UInt(OBJC_ASSOCIATION_RETAIN_NONATOMIC))
+                objc_setAssociatedObject(self, &AssociatedKeys.aRGBBitmapContextName, newValue as CGContextRef, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
                 didChangeValueForKey(AssociatedKeys.aRGBBitmapContextName)
             }
         }
@@ -260,7 +260,7 @@ extension UIImage{
             let bitmapByteCount = bitmapBytesPerRow * pixelsHeitht
             let colorSpace = CGColorSpaceCreateDeviceRGB()
             let bitmapData = UnsafeMutablePointer<Void>.alloc(bitmapByteCount)
-            let context = CGBitmapContextCreate(bitmapData,pixelsWidth,pixelsHeitht,8,bitmapBytesPerRow,colorSpace!, CGBitmapInfo(rawValue: CGBitmapInfo.ByteOrderDefault.rawValue | CGImageAlphaInfo.PremultipliedFirst.rawValue))
+            let context = CGBitmapContextCreate(bitmapData,pixelsWidth,pixelsHeitht,8,bitmapBytesPerRow,colorSpace!, CGBitmapInfo.ByteOrderDefault.rawValue | CGImageAlphaInfo.PremultipliedFirst.rawValue)!
             aRGBBitmapContext = context
             return context
         }
@@ -273,14 +273,13 @@ extension UIImage{
         let h = CGFloat(CGImageGetHeight(inImage))
         let rect = CGRectMake(0, 0, w, h)
         CGContextDrawImage(cgctx, rect, inImage)
-        let offset = 4*((w*round(point.y))+round(point.x))
-        var resData = UnsafePointer<UInt8>(CGBitmapContextGetData(cgctx))
-        var pixelInfo: Int = 4*((Int(w*round(point.y)))+Int(round(point.x)))
+        let resData = UnsafePointer<UInt8>(CGBitmapContextGetData(cgctx))
+        let pixelInfo: Int = 4*((Int(w*round(point.y)))+Int(round(point.x)))
         
-        var a = CGFloat(resData[pixelInfo]) / CGFloat(255.0)
-        var r = CGFloat(resData[pixelInfo+1]) / CGFloat(255.0)
-        var g = CGFloat(resData[pixelInfo+2]) / CGFloat(255.0)
-        var b = CGFloat(resData[pixelInfo+3]) / CGFloat(255.0)
+        let a = CGFloat(resData[pixelInfo]) / CGFloat(255.0)
+        let r = CGFloat(resData[pixelInfo+1]) / CGFloat(255.0)
+        let g = CGFloat(resData[pixelInfo+2]) / CGFloat(255.0)
+        let b = CGFloat(resData[pixelInfo+3]) / CGFloat(255.0)
         
         return UIColor(red: r, green: g, blue: b, alpha: a)
     }
