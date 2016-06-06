@@ -171,7 +171,7 @@ extension UIView{
         layer.addAnimation(shakeXAnimation, forKey: "shakeXAnimation")
         layer.addAnimation(shakeYAnimation, forKey: "shakeYAnimation")
         
-        _ = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: "scaleOpacityAnimations", userInfo: nil, repeats: false)
+        _ = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: #selector(UIView.scaleOpacityAnimations), userInfo: nil, repeats: false)
         
         if boomCells == nil{
             boomCells = [CALayer]()
@@ -193,7 +193,7 @@ extension UIView{
             }
         }
         
-        _ = NSTimer.scheduledTimerWithTimeInterval(0.35, target: self, selector: "cellAnimations", userInfo: nil, repeats: false)
+        _ = NSTimer.scheduledTimerWithTimeInterval(0.35, target: self, selector: #selector(UIView.cellAnimations), userInfo: nil, repeats: false)
     }
     
     //重置状态
@@ -208,8 +208,8 @@ extension UIView{
         }
         
         dispatch_once(&Static.token) {
-            let originalSelector = Selector("willMoveToSuperview:")
-            let swizzledSelector = Selector("XXY_willMoveToSuperview:")
+            let originalSelector = #selector(UIView.willMoveToSuperview(_:))
+            let swizzledSelector = #selector(UIView.XXY_willMoveToSuperview(_:))
             
             let originalMethod = class_getInstanceMethod(self, originalSelector)
             let swizzledMethod = class_getInstanceMethod(self, swizzledSelector)
