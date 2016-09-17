@@ -257,8 +257,11 @@ extension UIImage{
             let bitmapBytesPerRow = pixelsWidth! * 4
             let bitmapByteCount = bitmapBytesPerRow * pixelsHeitht!
             let colorSpace = CGColorSpaceCreateDeviceRGB()
-//            let bitmapData = UnsafeMutablePointer<Int>.allocate(capacity: bitmapByteCount)
-            let bitmapData = malloc(bitmapByteCount)
+//            let bitmapData = malloc(bitmapByteCount)
+            let bitmapData = UnsafeMutablePointer<Int>.allocate(capacity: bitmapByteCount)
+            defer {
+                bitmapData.deallocate(capacity: bitmapByteCount)
+            }
             let context = CGContext(data: bitmapData,width: pixelsWidth!,height: pixelsHeitht!,bitsPerComponent: 8,bytesPerRow: bitmapBytesPerRow,space: colorSpace, bitmapInfo: CGBitmapInfo().rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)!
             aRGBBitmapContext = context
             return context
