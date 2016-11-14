@@ -40,6 +40,7 @@
 		A94983151BBD30FF00E706A7 /* XXYBang_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XXYBang_Tests.swift; sourceTree = "<group>"; };
 		A94983211BBD328900E706A7 /* UIViewXXYBoom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewXXYBoom.swift; sourceTree = "<group>"; };
 		A95DB4E01BBFA5BA00157D98 /* boom.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = boom.gif; sourceTree = "<group>"; };
+		A9DB711D1DD9A9DD00C132BD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,6 +255,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				A94983041BBD30FF00E706A7 /* Base */,
+				A9DB711D1DD9A9DD00C132BD /* en */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
