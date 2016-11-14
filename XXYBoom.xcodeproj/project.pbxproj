@@ -169,7 +169,7 @@
 				TargetAttributes = {
 					A94982F91BBD30FF00E706A7 = {
 						CreatedOnToolsVersion = 6.4;
-						DevelopmentTeam = KMHYCH2A7R;
+						DevelopmentTeam = 38BP9ZUSA2;
 						LastSwiftMigration = 0800;
 					};
 					A949830E1BBD30FF00E706A7 = {
@@ -363,7 +363,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				DEVELOPMENT_TEAM = KMHYCH2A7R;
+				DEVELOPMENT_TEAM = 38BP9ZUSA2;
 				INFOPLIST_FILE = XXYBoom/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.xxycode.$(PRODUCT_NAME:rfc1034identifier)";
@@ -379,7 +379,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				DEVELOPMENT_TEAM = KMHYCH2A7R;
+				DEVELOPMENT_TEAM = 38BP9ZUSA2;
 				INFOPLIST_FILE = XXYBoom/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.xxycode.$(PRODUCT_NAME:rfc1034identifier)";

@@ -83,7 +83,7 @@ extension UIView{
             opacityAnimation.fromValue = 1
             opacityAnimation.toValue = 0
             opacityAnimation.duration = moveAnimation.duration
-//            opacityAnimation.delegate = self
+            //            opacityAnimation.delegate = self
             opacityAnimation.isRemovedOnCompletion = true
             opacityAnimation.fillMode = kCAFillModeForwards
             opacityAnimation.timingFunction = CAMediaTimingFunction(controlPoints: 0.380000, 0.033333, 0.963333, 0.260000)
@@ -258,10 +258,6 @@ extension UIImage{
             let bitmapByteCount = bitmapBytesPerRow * pixelsHeitht!
             let colorSpace = CGColorSpaceCreateDeviceRGB()
             let bitmapData = malloc(bitmapByteCount)
-//            let bitmapData = UnsafeMutablePointer<Int>.allocate(capacity: bitmapByteCount)
-//            defer {
-//                bitmapData.deallocate(capacity: bitmapByteCount)
-//            }
             let context = CGContext(data: bitmapData,width: pixelsWidth!,height: pixelsHeitht!,bitsPerComponent: 8,bytesPerRow: bitmapBytesPerRow,space: colorSpace, bitmapInfo: CGBitmapInfo().rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)!
             aRGBBitmapContext = context
             return context
@@ -269,20 +265,14 @@ extension UIImage{
     }
     
     func getPixelColorAtLocation(_ point:CGPoint) -> UIColor{
-        let inImage = self.cgImage
-        let cgctx = createARGBBitmapContextFromImage()
-        let w = CGFloat((inImage?.width)!)
-        let h = CGFloat((inImage?.height)!)
-        let rect = CGRect(x: 0, y: 0, width: w, height: h)
-        cgctx.draw(inImage!, in: rect)
-        let pixelData = inImage!.dataProvider!.data
-        let resData: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
-        let pixelInfo: Int = 4*((Int(w*round(point.y)))+Int(round(point.x)))
+        let pixelData=self.cgImage!.dataProvider!.data
+        let data:UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
+        let pixelInfo: Int = ((Int(self.size.width) * Int(point.y)) + Int(point.x)) * 4
         
-        let a = CGFloat(resData[pixelInfo]) / CGFloat(255.0)
-        let r = CGFloat(resData[pixelInfo+1]) / CGFloat(255.0)
-        let g = CGFloat(resData[pixelInfo+2]) / CGFloat(255.0)
-        let b = CGFloat(resData[pixelInfo+3]) / CGFloat(255.0)
+        let b = CGFloat(data[pixelInfo]) / CGFloat(255.0)
+        let g = CGFloat(data[pixelInfo+1]) / CGFloat(255.0)
+        let r = CGFloat(data[pixelInfo+2]) / CGFloat(255.0)
+        let a = CGFloat(data[pixelInfo+3]) / CGFloat(255.0)
         
         return UIColor(red: r, green: g, blue: b, alpha: a)
     }
