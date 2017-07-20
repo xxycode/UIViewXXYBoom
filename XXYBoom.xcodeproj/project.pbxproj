@@ -171,12 +171,12 @@
 					A94982F91BBD30FF00E706A7 = {
 						CreatedOnToolsVersion = 6.4;
 						DevelopmentTeam = 38BP9ZUSA2;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0830;
 					};
 					A949830E1BBD30FF00E706A7 = {
 						CreatedOnToolsVersion = 6.4;
 						DevelopmentTeam = KMHYCH2A7R;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0830;
 						TestTargetID = A94982F91BBD30FF00E706A7;
 					};
 				};
